@@ -10,7 +10,7 @@ to interact with 1Password.
 ## Prerequisites
 
 * [PowerShell](https://github.com/PowerShell/PowerShell)
-* The [`1password-cli`](https://support.1password.com/command-line/)
+* The [`1password-cli`](https://support.1password.com/command-line/) and accessible from Path
 * The [SecretManagement](https://github.com/PowerShell/SecretManagement) PowerShell module
 
 You can get the `SecretManagement` module from the PowerShell Gallery:
@@ -48,8 +48,12 @@ Once you have it installed,
 you need to register the module as an extension:
 
 ```pwsh
-Register-SecretVault -ModuleName SecretManagement.1Password -VaultParameters @{AccountName = 'myaccountname'; EmailAddress = 'user@youremail.com'; SecretKey = 'secretkey-for-your-account'}
+Register-SecretVault -Name vaultname -ModuleName SecretManagement.1Password -VaultParameters @{AccountName = 'myaccountname'; EmailAddress = 'user@youremail.com'; SecretKey = 'secretkey-for-your-account'}
 ```
+
+**Note**: The name you provide the `Name` parameter needs to match an existing vault in 1Password.
+If you want to access more than oen 1Password vault you need to register them separately with `Register-SecretVault`
+
 
 ### Vault parameters
 
