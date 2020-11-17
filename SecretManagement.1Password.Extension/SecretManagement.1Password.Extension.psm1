@@ -22,7 +22,7 @@ function Test-SecretVault {
     if (-not $VaultParameters.SecretKey) { throw '1Password: You must specify an SecretKey for your 1Password Account to test' }
 
     Write-Verbose "Test listing vaults"
-    $vaults = & op list vaults 2>null | ConvertFrom-Json
+    $vaults = & op list vaults 2>$null | ConvertFrom-Json
 
     if ($null -eq $vaults) {
         if ( $null -eq [System.Environment]::GetEnvironmentVariable("OP_SESSION_$accountName") ) {
@@ -43,7 +43,7 @@ function Test-SecretVault {
         [System.Environment]::SetEnvironmentVariable("OP_SESSION_$accountName", $token)
 
         Write-Verbose "Test listing vaults final"
-        $vaults = & op list vaults 2>null | ConvertFrom-Json
+        $vaults = & op list vaults 2>$null | ConvertFrom-Json
     }
 
     $Vaults.name -contains $VaultName
@@ -60,7 +60,8 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
+    # Password category isn't supported for some reason
+    $items = & op list items --categories Login --vault $VaultName | ConvertFrom-Json
 
 
     foreach ($item in $items) {
@@ -91,7 +92,7 @@ function Get-Secret {
         [hashtable] $AdditionalParameters
     )
 
-    $item = & op get item $Name --fields username, password --vault $VaultName --session | ConvertFrom-Json
+    $item = & op get item $Name --fields username,password --vault $VaultName 2>$null | ConvertFrom-Json
 
     [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
 
