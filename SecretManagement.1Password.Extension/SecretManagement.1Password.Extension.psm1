@@ -55,6 +55,8 @@ function Get-SecretInfo {
         [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [string]$VaultName,
         [Parameter()]
+        [string]$Filter,
+        [Parameter()]
         [hashtable] $AdditionalParameters
     )
 
@@ -82,6 +84,8 @@ function Get-Secret {
         [Parameter()]
         [string]$Name,
         [Parameter()]
+        [string]$Filter,
+        [Parameter()]
         [string]$VaultName,
         [Parameter()]
         [hashtable] $AdditionalParameters
@@ -107,6 +111,8 @@ function Set-Secret {
     param (
         [Parameter()]
         [string]$Name,
+        [Parameter()]
+        [string]$Secret,
         [Parameter()]
         [string]$VaultName,
         [Parameter()]
