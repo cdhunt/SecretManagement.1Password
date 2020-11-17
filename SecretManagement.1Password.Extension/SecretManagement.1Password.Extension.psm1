@@ -53,7 +53,9 @@ function Get-SecretInfo {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
-        [string]$VaultName
+        [string]$VaultName,
+        [Parameter()]
+        [hashtable] $AdditionalParameters
     )
 
     $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
@@ -77,8 +79,12 @@ function Get-SecretInfo {
 function Get-Secret {
     [CmdletBinding()]
     param (
+        [Parameter()]
         [string]$Name,
-        [string]$VaultName
+        [Parameter()]
+        [string]$VaultName,
+        [Parameter()]
+        [hashtable] $AdditionalParameters
     )
 
     $item = & op get item $Name --fields username, password --vault $VaultName --session | ConvertFrom-Json
@@ -94,4 +100,35 @@ function Get-Secret {
             $secureStringPassword
         )
     }
+}
+
+function Set-Secret {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]$Name,
+        [Parameter()]
+        [string]$VaultName,
+        [Parameter()]
+        [hashtable] $AdditionalParameters
+    )
+
+    Write-Warning "Not implemented"
+    return $false
+}
+
+function Remove-Secret {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]$Name,
+        [Parameter()]
+        [string]$VaultName,
+        [Parameter()]
+        [hashtable] $AdditionalParameters
+    )
+
+
+    Write-Warning "Not implemented"
+    return $false
 }
