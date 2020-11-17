@@ -3,8 +3,9 @@ using namespace Microsoft.PowerShell.SecretManagement
 function Test-SecretVault {
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [string]$VaultName,
+
         [Parameter(ValueFromPipelineByPropertyName)]
         [hashtable]$AdditionalParameters = (Get-SecretVault -Name $vaultName).VaultParameters
     )
@@ -32,7 +33,8 @@ function Test-SecretVault {
                 Write-Verbose "Attemp login with all parameters"
                 $token = & op signin $accountName $emailAddress $secretKey -raw
             }
-        } else {
+        }
+        else {
             Write-Verbose "Attemp login with shorthand and grab session token"
             & op signin $accountName
         }
@@ -47,14 +49,14 @@ function Test-SecretVault {
     $Vaults.name -contains $VaultName
 }
 
-function Get-1PSecretInfo {
+function Get-SecretInfo {
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [string]$VaultName
     )
 
-    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
+    $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
 
 
     foreach ($item in $items) {
@@ -72,20 +74,21 @@ function Get-1PSecretInfo {
     }
 }
 
-function Get-1PSecret {
+function Get-Secret {
     [CmdletBinding()]
     param (
         [string]$Name,
         [string]$VaultName
     )
 
-    $item = & op get item $Name --fields username,password --vault $VaultName --session  | ConvertFrom-Json
+    $item = & op get item $Name --fields username, password --vault $VaultName --session | ConvertFrom-Json
 
     [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
 
-    if ([string]::IsNullOrEmpty($item.username)){
+    if ([string]::IsNullOrEmpty($item.username)) {
         $secureStringPassword
-    } else {
+    }
+    else {
         [PSCredential]::new(
             $item.username,
             $secureStringPassword

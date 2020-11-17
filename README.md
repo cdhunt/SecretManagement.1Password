@@ -53,7 +53,7 @@ Register-SecretVault -ModuleName SecretManagement.1Password -VaultParameters @{A
 
 ### Vault parameters
 
-The module also have the following vault parameter, that must be provided at registration.
+The module also has the following vault parameter that must be provided at registration.
 
 #### AccountName
 
