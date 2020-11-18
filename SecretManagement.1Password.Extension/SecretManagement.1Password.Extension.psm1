@@ -100,7 +100,7 @@ function Get-Secret {
         [hashtable] $AdditionalParameters
     )
 
-    $item = & op get item $Name --fields username,password --vault $VaultName 2>$null | ConvertFrom-Json -AsHashtable
+    $item = & op get item $Name --fields username, password --vault $VaultName 2>$null | ConvertFrom-Json -AsHashtable
 
     [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
 
@@ -225,23 +225,33 @@ function Set-Secret {
         }
     }
     Write-Verbose ($sanitizedArgs -join ' ')
-        & op @commandArgs
+    & op @commandArgs
 
-        return $?
-    }
+    return $?
+}
 
-    function Remove-Secret {
-        [CmdletBinding()]
-        param (
-            [Parameter()]
-            [string]$Name,
-            [Parameter()]
-            [string]$VaultName,
-            [Parameter()]
-            [hashtable] $AdditionalParameters
-        )
+function Remove-Secret {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]$Name,
+        [Parameter()]
+        [string]$VaultName,
+        [Parameter()]
+        [hashtable] $AdditionalParameters
+    )
 
 
-        Write-Warning "Not implemented"
-        return $false
-    }
+    $verb =  'delete'
+    $commandArgs = [Collections.ArrayList]::new()
+    $commandArgs.Add($verb) | Out-Null
+    $commandArgs.Add("item") | Out-Null
+    $commandArgs.Add($Name) | Out-Null
+    $commandArgs.Add('--vault') | Out-Null
+    $commandArgs.Add($VaultName) | Out-Null
+
+    Write-Verbose ($commandArgs -join ' ')
+    & op @commandArgs
+
+    return $LASTEXITCODE -eq 0
+}
