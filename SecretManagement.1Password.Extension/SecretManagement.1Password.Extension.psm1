@@ -60,8 +60,7 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    # Password category isn't supported for some reason
-    $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
+    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
 
     $keyList = [Collections.ArrayList]::new()
 
