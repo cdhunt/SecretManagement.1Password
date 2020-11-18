@@ -113,15 +113,42 @@ function Set-Secret {
         [Parameter()]
         [string]$Name,
         [Parameter()]
-        [string]$Secret,
+        [object]$Secret,
         [Parameter()]
         [string]$VaultName,
         [Parameter()]
         [hashtable] $AdditionalParameters
     )
 
-    Write-Warning "Not implemented"
-    return $false
+    $item = & op get item $Name --fields title --vault $VaultName 2>$null
+
+    $date = @{}
+
+    switch ($Secret.GetType().Name) {
+        'string' { Write-Warning "String input is not yet implemented" }
+        'securestring' { Write-Warning "SecureString input is not yet implemented" }
+        'PSCredential' {
+            $data =  op get template login | ConvertFrom-Json -AsHashtable
+
+            $data.fields | ForEach-Object {
+                if ($_.name -eq 'username') {$_.value = $Secret.UserName}
+                if ($_.name -eq 'password') {$_.value = $Secret.GetNetworkCredential().password}
+            }
+
+            $endcodedData = $data | ConvertTo-Json | op encode
+
+            $category = "Login"
+         }
+        Default {}
+    }
+
+    if ($null -eq $item) {
+        & op create item $category $endcodedData title=$Name --vault $VaultName
+    } else {
+        & op edit item $item username=$($Secret.UserName) password=$($Secret.GetNetworkCredential().password) --vault $VaultName
+    }
+
+    return $?
 }
 
 function Remove-Secret {
