@@ -60,12 +60,12 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
+    $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
 
     $keyList = [Collections.ArrayList]::new()
 
     foreach ($item in $items) {
-        if ( $keyList.Contains($item.overview.title) ) {
+        if ( $keyList.Contains(($item.overview.title).ToLower()) ) {
             Write-Verbose "Get-SecretInfo: An item with the same key has already been added. Key: [$($item.overview.title)]"
         }
         else {
@@ -81,7 +81,7 @@ function Get-SecretInfo {
                 $type,
                 $VaultName
             )
-            $keyList.Add($item.overview.title)
+            $keyList.Add(($item.overview.title).ToLower())
         }
     }
 }
