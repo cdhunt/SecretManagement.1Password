@@ -98,19 +98,39 @@ function Get-Secret {
         [Parameter()]
         [hashtable] $AdditionalParameters
     )
+    $totp = -1
+    $item = & op get item $Name --fields username,password,one-timepassword --vault $VaultName | ConvertFrom-Json -AsHashtable
+    if (-not [string]::IsNullOrEmpty($item["one-timepassword"]) )
+    {
+        $totp = & op get totp $Name --vault $VaultName 2>$nul
+    }
 
-    $item = & op get item $Name --fields username,password --vault $VaultName 2>$null | ConvertFrom-Json -AsHashtable
+    [securestring]$secureStringPassword =
 
-    [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
+    if ( -not [string]::IsNullOrEmpty($item["password"]) ) {
+        [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
+    }
 
-    if ([string]::IsNullOrEmpty($item.username)) {
-        $secureStringPassword
+
+    $output = $null
+
+    if ([string]::IsNullOrEmpty($item["password"]) -and -not [string]::IsNullOrEmpty($item.username)) {
+        $output = @{UserName = $item.username}
+    } elseif
+    ([string]::IsNullOrEmpty($item.username)) {
+        $output = $secureStringPassword
     }
     else {
-        [PSCredential]::new(
+        $output = [PSCredential]::new(
             $item.username,
             $secureStringPassword
         )
+    }
+
+    if ($totp -gt -1) {
+            $output | Add-Member -MemberType ScriptMethod -Name totp -Value {& op get totp $Name --vault $VaultName}.GetNewClosure() -PassThru
+    } else {
+        $output
     }
 }
 
