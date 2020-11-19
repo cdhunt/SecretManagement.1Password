@@ -134,8 +134,8 @@ function Set-Secret {
     $commandArgs = [Collections.ArrayList]::new()
 
     Write-Verbose "Secret type [$($Secret.GetType().Name)]"
-    switch ($Secret.GetType().Name) {
-        { 'string' -or 'Int32' -or 'Int64' -or 'Double' } {
+    switch ($Secret.GetType()) {
+        { $_.IsValueType } {
             $category = "Password"
             Write-Verbose "Processing [string] as $category"
             $commandArgs.Add($verb) | Out-Null
@@ -158,7 +158,7 @@ function Set-Secret {
             }
             break
         }
-        'securestring' {
+        { $_.Name -eq 'securestring' } {
             $category = "Password"
             Write-Verbose "Processing [securestring] as $category"
             $commandArgs.Add($verb) | Out-Null
@@ -181,7 +181,7 @@ function Set-Secret {
             }
             break
         }
-        'PSCredential' {
+        { $_.Name -eq 'PSCredential' } {
             $category = "Login"
             Write-Verbose "Processing [PSCredential] as $category"
             $commandArgs.Add($verb) | Out-Null
@@ -192,7 +192,7 @@ function Set-Secret {
                 $data = op get template $category | ConvertFrom-Json -AsHashtable
                 $data.fields | ForEach-Object {
                     if ($_.name -eq 'username') { $_.value = $Secret.UserName }
-                    if ($_.name -eq 'password') { $_.value = ConvertFrom-SecureString -SecureString $Secret -AsPlainText }
+                    if ($_.name -eq 'password') { $_.value = $Secret.GetNetworkCredential().Password }
                 }
                 $endcodedData = $data | ConvertTo-Json | op encode
 
@@ -241,7 +241,7 @@ function Remove-Secret {
     )
 
 
-    $verb =  'delete'
+    $verb = 'delete'
     $commandArgs = [Collections.ArrayList]::new()
     $commandArgs.Add($verb) | Out-Null
     $commandArgs.Add("item") | Out-Null
