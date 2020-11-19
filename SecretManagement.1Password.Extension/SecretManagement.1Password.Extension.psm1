@@ -105,12 +105,9 @@ function Get-Secret {
         $totp = & op get totp $Name --vault $VaultName 2>$nul
     }
 
-    [securestring]$secureStringPassword =
-
     if ( -not [string]::IsNullOrEmpty($item["password"]) ) {
         [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
     }
-
 
     $output = $null
 
