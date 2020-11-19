@@ -60,7 +60,7 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    $items = & op list items --categories Login, Password --vault $VaultName | ConvertFrom-Json
+    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
 
     $keyList = [Collections.ArrayList]::new()
 
