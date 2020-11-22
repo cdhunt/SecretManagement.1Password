@@ -29,8 +29,22 @@ Describe 'Handling Op output' {
             $results.Message | Should -Be 'unknown shorthand flag: ''m'' in -madeup'
             $results.Success | Should -BeFalse
         }
-
     }
+
+    Context 'Base' -Tag 'Unit' {
+        BeforeEach {
+            $op = [Op]::new()
+        }
+
+        It 'Sanitize arguments' {
+            $op.AddAssignment('password', 'abc123')
+
+            $results = $op.GetSanitizedArgumentString()
+
+            $results | Should -Be 'password=*****'
+        }
+    }
+
     Context 'List' -Tag 'Unit' {
         BeforeEach {
             $opListItemsCommand = [OpListItemsCommand]::new()

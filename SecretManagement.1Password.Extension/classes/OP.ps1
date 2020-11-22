@@ -70,6 +70,8 @@ class Op {
             $this.Message = [Op]::ParseError($StdErr)
         }
 
+        Write-Verbose "(Invoke) Message=[$($this.Message)]"
+
         return $this
     }
 
@@ -77,6 +79,20 @@ class Op {
         $matches = Select-String -InputObject $Message -Pattern '\[ERROR\] (?<date>\d{4}\W\d{1,2}\W\d{1,2}) (?<time>\d{2}:\d{2}:\d{2}) (?<message>.*)'
 
         return $matches.Matches.Groups.Where({$_.Name -eq 'message'}).Value
+    }
+
+    [string] GetSanitizedArgumentString() {
+        $sanitizedArgs = $this.ProcessInfo.ArgumentList | ForEach-Object {
+            if ($_ -like 'password=*') {
+                'password=*****'
+            }
+            else {
+
+                $_
+            }
+        }
+
+        return $sanitizedArgs -join ' '
     }
 }
 
