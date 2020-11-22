@@ -45,7 +45,7 @@ Describe 'Handling Op output' {
         }
     }
 
-    Context 'List' -Tag 'Unit' {
+    Context 'Get List' -Tag 'Unit' {
         BeforeEach {
             $opListItemsCommand = [OpListItemsCommand]::new()
         }
@@ -58,7 +58,7 @@ Describe 'Handling Op output' {
         }
 
         It 'Add categories' {
-            $opListItemsCommand.AddCategories(@('login','password'))
+            $opListItemsCommand.AddCategories(@('login', 'password'))
             $results = $opListItemsCommand.ProcessInfo.ArgumentList
 
             $results[0] | Should -Be 'list'
@@ -76,6 +76,58 @@ Describe 'Handling Op output' {
             $results[1] | Should -Be 'items'
             $results[2] | Should -Be '--vault'
             $results[3] | Should -Be 'test'
+        }
+    }
+
+    Context 'Get Item' -Tag 'Unit' {
+        BeforeEach {
+            $opGetItemCommand = [OpGetItemCommand]::new('test_item')
+        }
+
+        It 'Simple' {
+            $results = $opGetItemCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'get'
+            $results[1] | Should -Be 'item'
+            $results[2] | Should -Be 'test_item'
+        }
+
+        It 'Add fields' {
+            $opGetItemCommand.AddFields(@('username', 'password'))
+            $results = $opGetItemCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'get'
+            $results[1] | Should -Be 'item'
+            $results[2] | Should -Be 'test_item'
+            $results[3] | Should -Be '--fields'
+            $results[4] | Should -Be 'username,password'
+        }
+
+        It 'With Vault' {
+            $opGetItemCommand.SetVault('test')
+            $opGetItemCommand.AddVaultFlag()
+            $results = $opGetItemCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'get'
+            $results[1] | Should -Be 'item'
+            $results[2] | Should -Be 'test_item'
+            $results[3] | Should -Be '--vault'
+            $results[4] | Should -Be 'test'
+        }
+
+        It 'With fields and vault' {
+            $opGetItemCommand.AddFields(@('username', 'password'))
+            $opGetItemCommand.SetVault('test')
+            $opGetItemCommand.AddVaultFlag()
+            $results = $opGetItemCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'get'
+            $results[1] | Should -Be 'item'
+            $results[2] | Should -Be 'test_item'
+            $results[3] | Should -Be '--fields'
+            $results[4] | Should -Be 'username,password'
+            $results[5] | Should -Be '--vault'
+            $results[6] | Should -Be 'test'
         }
     }
 }

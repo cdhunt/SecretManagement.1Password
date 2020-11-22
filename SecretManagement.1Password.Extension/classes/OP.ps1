@@ -86,7 +86,7 @@ class Op {
     static [string] ParseError([string]$Message) {
         $matches = Select-String -InputObject $Message -Pattern '\[ERROR\] (?<date>\d{4}\W\d{1,2}\W\d{1,2}) (?<time>\d{2}:\d{2}:\d{2}) (?<message>.*)'
 
-        return $matches.Matches.Groups.Where({$_.Name -eq 'message'}).Value
+        return $matches.Matches.Groups.Where( { $_.Name -eq 'message' }).Value
     }
 
     [string] GetSanitizedArgumentString() {
@@ -104,9 +104,9 @@ class Op {
     }
 }
 
-class OpListItemsCommand : Op{
+class OpListItemsCommand : Op {
 
-    OpListItemsCommand() : base()  {
+    OpListItemsCommand() : base() {
         $this.AddArgument('list')
         $this.AddArgument('items')
     }
@@ -119,5 +119,24 @@ class OpListItemsCommand : Op{
     [object] Invoke() {
         $this.AddVaultFlag()
         return [Op]$this.Invoke()
+    }
+}
+
+class OpGetItemCommand : Op {
+
+    OpGetItemCommand() : base() {
+        $this.AddArgument('get')
+        $this.AddArgument('item')
+    }
+
+    OpGetItemCommand([string]$Name) : base() {
+        $this.AddArgument('get')
+        $this.AddArgument('item')
+        $this.AddArgument($Name)
+    }
+
+    [void] AddFields([string[]]$Fields) {
+        $this.AddArgument('--fields')
+        $this.AddArgument($Fields -join ',')
     }
 }
