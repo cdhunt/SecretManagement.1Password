@@ -11,6 +11,7 @@ enum OpItemsCategories {
 class Op {
     hidden [string]$Bin
     hidden [Diagnostics.ProcessStartInfo]$ProcessInfo
+    hidden [string]$StandardOuput
 
     [string]$Vault
     [string]$Message
@@ -61,26 +62,34 @@ class Op {
         $this.AddArgument($this.Vault)
     }
 
-    [object] Invoke() {
-
+    [bool] InvokeOp() {
         Write-Verbose "(Invoke) ArgumentList=[$($this.GetSanitizedArgumentString())]"
 
         $process = [Diagnostics.Process]::new()
         $process.StartInfo = $this.ProcessInfo
         $process.Start() | Out-Null
-        $process.WaitForExit()
+        $process.WaitForExit(5000)
 
-        $StdOut = $process.StandardOutput.ReadToEnd()
+        $this.StandardOuput = $process.StandardOutput.ReadToEnd()
         $StdErr = $process.StandardError.ReadToEnd()
+
+        Write-Verbose "(Invoke) Message=[$($this.Message)]"
 
         if (-not [string]::IsNullOrEmpty($StdErr) ) {
             $this.Success = $false
             $this.Message = [Op]::ParseError($StdErr)
+        } else {
+            $this.Success = $true
         }
 
-        Write-Verbose "(Invoke) Message=[$($this.Message)]"
+        return $this.Success
+    }
 
-        return $this
+    [string] Invoke() {
+
+        $result = $this.InvokeOp()
+
+        return $this.Message
     }
 
     static [string] ParseError([string]$Message) {
@@ -116,9 +125,18 @@ class OpListItemsCommand : Op {
         $this.AddArgument($Categories -join ',')
     }
 
-    [object] Invoke() {
+    [PSCustomObject[]] Invoke() {
+
         $this.AddVaultFlag()
-        return [Op]$this.Invoke()
+
+        $result = $this.InvokeOp()
+
+        if ($result) {
+            return $result | ConvertFrom-Json
+        } else {
+            return $null
+        }
+
     }
 }
 
