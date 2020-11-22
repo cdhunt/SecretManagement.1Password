@@ -9,7 +9,6 @@ enum OpItemsCategories {
 }
 
 class Op {
-    hidden [string]$SanitizedOutput
     hidden [string]$Bin
     hidden [Diagnostics.ProcessStartInfo]$ProcessInfo
 
@@ -50,12 +49,21 @@ class Op {
         $this.ProcessInfo.ArgumentList.Add($Argument)
     }
 
+    [void] AddAssignment ([string]$Key, [object]$Value) {
+
+        $assignment = $Key, $Value.ToString() -join '='
+
+        $this.ProcessInfo.ArgumentList.Add($assignment)
+    }
+
     [void] AddVaultFlag () {
         $this.AddArgument('--vault')
         $this.AddArgument($this.Vault)
     }
 
     [object] Invoke() {
+
+        Write-Verbose "(Invoke) ArgumentList=[$($this.GetSanitizedArgumentString())]"
 
         $process = [Diagnostics.Process]::new()
         $process.StartInfo = $this.ProcessInfo
