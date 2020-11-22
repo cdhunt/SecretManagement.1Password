@@ -52,6 +52,17 @@ Describe 'Handling Op output' {
             $results[2] | Should -Be '--categories'
             $results[3] | Should -Be 'Login,Password'
         }
+
+        It 'With Vault' {
+            $opListItemsCommand.SetVault('test')
+            $opListItemsCommand.AddVaultFlag()
+            $results = $opListItemsCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'list'
+            $results[1] | Should -Be 'items'
+            $results[2] | Should -Be '--vault'
+            $results[3] | Should -Be 'test'
+        }
     }
 }
 

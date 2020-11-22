@@ -13,6 +13,7 @@ class Op {
     hidden [string]$Bin
     hidden [Diagnostics.ProcessStartInfo]$ProcessInfo
 
+    [string]$Vault
     [string]$Message
     [bool] $Success
 
@@ -28,8 +29,30 @@ class Op {
         $this.Success = $true
     }
 
+    Op ([string]$VaultName) {
+        $this.Bin = Get-Command -Name 'op' -CommandType Application | Select-Object -ExpandProperty Source
+        $this.ProcessInfo = [Diagnostics.ProcessStartInfo]::new()
+        $this.ProcessInfo.FileName = $this.Bin
+        $this.ProcessInfo.RedirectStandardError = $true
+        $this.ProcessInfo.RedirectStandardOutput = $true
+        $this.ProcessInfo.UseShellExecute = $false
+
+        $this.Message = 'The command completed without error.'
+        $this.Success = $true
+        $this.Vault = $VaultName
+    }
+
+    [void] SetVault ([string]$VaultName) {
+        $this.Vault = $VaultName
+    }
+
     [void] AddArgument ([string]$Argument) {
         $this.ProcessInfo.ArgumentList.Add($Argument)
+    }
+
+    [void] AddVaultFlag () {
+        $this.AddArgument('--vault')
+        $this.AddArgument($this.Vault)
     }
 
     [object] Invoke() {
@@ -67,5 +90,10 @@ class OpListItemsCommand : Op{
     [void] AddCategories([string[]]$Categories) {
         $this.AddArgument('--categories')
         $this.AddArgument($Categories -join ',')
+    }
+
+    [object] Invoke() {
+        $this.AddVaultFlag()
+        return [Op]$this.Invoke()
     }
 }
