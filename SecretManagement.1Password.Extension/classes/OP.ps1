@@ -32,24 +32,6 @@ class Op {
         $this.ProcessInfo.ArgumentList.Add($Argument)
     }
 
-    [Op] List ([OpNouns]$Noun)
-    {
-        $this.AddArgument('list')
-        $this.AddArgument($Noun.ToString())
-
-        return $this.Invoke()
-    }
-
-    [Op] List ([OpNouns]$Noun, [OpItemsCategories[]]$Categories)
-    {
-        $this.AddArgument('list')
-        $this.AddArgument($Noun.ToString())
-        $this.AddArgument('--categories')
-        $this.AddArgument($Categories.ForEach({$_.ToString()}) -join(','))
-
-        return $this.Invoke()
-    }
-
     [object] Invoke() {
 
         $process = [Diagnostics.Process]::new()
@@ -72,5 +54,18 @@ class Op {
         $matches = Select-String -InputObject $Message -Pattern '\[ERROR\] (?<date>\d{4}\W\d{1,2}\W\d{1,2}) (?<time>\d{2}:\d{2}:\d{2}) (?<message>.*)'
 
         return $matches.Matches.Groups.Where({$_.Name -eq 'message'}).Value
+    }
+}
+
+class OpListItemsCommand : Op{
+
+    OpListItemsCommand() : base()  {
+        $this.AddArgument('list')
+        $this.AddArgument('items')
+    }
+
+    [void] AddCategories([string[]]$Categories) {
+        $this.AddArgument('--categories')
+        $this.AddArgument($Categories -join ',')
     }
 }

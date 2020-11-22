@@ -1,12 +1,11 @@
 Describe 'Handling Op output' {
     BeforeAll {
-        . C:\source\github\SecretManagement.1Password\SecretManagement.1Password.Extension\Class-OP.ps1
+        . C:\source\github\SecretManagement.1Password\SecretManagement.1Password.Extension\classes\OP.ps1
     }
-    Context 'Not signed in' {
+    Context 'Not signed in' -Tag 'Integration' {
         BeforeEach {
             $op = [Op]::new()
         }
-
         It 'Should parse error messages' {
             $message = '[ERROR] 2020/11/22 11:20:32 You are not currently signed in. Please run `op signin --help` for instructions'
 
@@ -31,20 +30,27 @@ Describe 'Handling Op output' {
             $results.Success | Should -BeFalse
         }
 
-        It 'Should return login error on List' {
-            $results = $op.List([OpNouns]::items)
-
-            $results.Messsage | Should -Be 'You are not currently signed in. Please run `op signin --help` for instructions'
-            $results.Success | Should -BeFalse
+    }
+    Context 'List' -Tag 'Unit' {
+        BeforeEach {
+            $opListItemsCommand = [OpListItemsCommand]::new()
         }
 
-        It 'Add categories flag' {
-            # Mock Invoke()
-            $op | Add-Member -MemberType ScriptMethod -Name Invoke -Value {$this} -Force
+        It 'Simple' {
+            $results = $opListItemsCommand.ProcessInfo.ArgumentList
 
-            $results = $op.List([OpNouns]::items, @([OpItemsCategories]::Login, [OpItemsCategories]::Password))
+            $results[0] | Should -Be 'list'
+            $results[1] | Should -Be 'items'
+        }
 
-            $results | Should -Contain 'list', 'items', '--categories', 'Login,Password'
+        It 'Add categories' {
+            $opListItemsCommand.AddCategories(@('login','password'))
+            $results = $opListItemsCommand.ProcessInfo.ArgumentList
+
+            $results[0] | Should -Be 'list'
+            $results[1] | Should -Be 'items'
+            $results[2] | Should -Be '--categories'
+            $results[3] | Should -Be 'Login,Password'
         }
     }
 }
