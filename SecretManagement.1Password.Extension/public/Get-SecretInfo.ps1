@@ -12,7 +12,10 @@ function Get-SecretInfo {
     $op = [OpListItemsCommand]::new($VaultName)
     $op.AddCategories(@('Login', 'Password'))
 
-    $items = $op.Invoke()
+    # Use the parent scroped cmdlet to pull in the saved VaultParameters
+    if (Microsoft.PowerShell.SecretManagement\Test-SecretVault -Name $VaultName) {
+        $items = $op.Invoke()
+    }
 
     if ($op.Success) {
         $keyList = [Collections.ArrayList]::new()
