@@ -67,19 +67,51 @@ class Op {
 
         $process = [Diagnostics.Process]::new()
         $process.StartInfo = $this.ProcessInfo
-        $process.Start() | Out-Null
-        $process.WaitForExit(5000)
+        $cleanExit = $false
 
-        $this.StandardOuput = $process.StandardOutput.ReadToEnd()
-        $StdErr = $process.StandardError.ReadToEnd()
-
-        Write-Verbose "(Invoke) Message=[$($this.Message)]"
-
-        if (-not [string]::IsNullOrEmpty($StdErr) ) {
+        try {
+            $process.Start() | Out-Null
+        } catch [ObjectDisposedException] {
             $this.Success = $false
-            $this.Message = [Op]::ParseError($StdErr)
+            $this.Message = 'No file name was specified.'
+        } catch [InvalidOperationException] {
+            $this.Success = $false
+            $this.Message = 'The process object has already been disposed.'
+        } catch [PlatformNotSupportedException] {
+            $this.Success = $false
+            $this.Message = 'This member is not supported on this platform.'
+        } catch {
+            $this.Success = $false
+            $this.Message = 'An error occurred when opening the associated file.'
+        }
+
+
+        try {
+            $cleanExit = $process.WaitForExit(5000)
+        } catch [SystemException] {
+            $this.Success = $false
+            $this.Message = 'No process Id has been set, and a Handle from which the Id property can be determined does not exist or there is no process associated with this Process object.'
+        }  catch {
+            $this.Success = $false
+            $this.Message = 'The wait setting could not be accessed.'
+        }
+
+        if ($cleanExit) {
+
+            $this.StandardOuput = $process.StandardOutput.ReadToEnd()
+            $StdErr = $process.StandardError.ReadToEnd()
+
+            Write-Verbose "(Invoke) Message=[$($this.Message)]"
+
+            if (-not [string]::IsNullOrEmpty($StdErr) ) {
+                $this.Success = $false
+                $this.Message = [Op]::ParseError($StdErr)
+            } else {
+                $this.Success = $true
+            }
         } else {
-            $this.Success = $true
+            $this.Success = $false
+            $this.Message = 'Timed out waiting for Op to run.'
         }
 
         return $this.Success
