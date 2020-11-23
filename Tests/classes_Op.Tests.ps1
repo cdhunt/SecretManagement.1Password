@@ -46,6 +46,28 @@ Describe 'Handling Op output' {
         }
     }
 
+    Context 'Constructor' -Tag 'Unit' {
+        It 'New' {
+            $op = [Op]::new()
+
+            $op.Bin | Should -Match 'Op'
+            $op.ProcessInfo.FileName | Should -Be $op.Bin
+            $op.Message | Should -Be 'The command completed without error.'
+            $op.Success | Should -BeTrue
+        }
+
+        It 'New with vault name' {
+            $op = [Op]::new('test_vault')
+
+            $op.Bin | Should -Match 'Op'
+            $op.ProcessInfo.FileName | Should -Be $op.Bin
+            $op.Message | Should -Be 'The command completed without error.'
+            $op.Success | Should -BeTrue
+
+            $op.Vault | Should -Be 'test_vault'
+        }
+    }
+
     Context 'Get List' -Tag 'Unit' {
         BeforeEach {
             $opListItemsCommand = [OpListItemsCommand]::new()

@@ -1,12 +1,3 @@
-enum OpNouns {
-    vaults
-    items
-}
-
-enum OpItemsCategories {
-    Login = 1
-    Password = 5
-}
 
 class Op {
     hidden [string]$Bin
@@ -17,7 +8,7 @@ class Op {
     [string]$Message
     [bool] $Success
 
-    Op () {
+    hidden [void] Init() {
         $this.Bin = Get-Command -Name 'op' -CommandType Application | Select-Object -ExpandProperty Source
         $this.ProcessInfo = [Diagnostics.ProcessStartInfo]::new()
         $this.ProcessInfo.FileName = $this.Bin
@@ -29,16 +20,12 @@ class Op {
         $this.Success = $true
     }
 
-    Op ([string]$VaultName) {
-        $this.Bin = Get-Command -Name 'op' -CommandType Application | Select-Object -ExpandProperty Source
-        $this.ProcessInfo = [Diagnostics.ProcessStartInfo]::new()
-        $this.ProcessInfo.FileName = $this.Bin
-        $this.ProcessInfo.RedirectStandardError = $true
-        $this.ProcessInfo.RedirectStandardOutput = $true
-        $this.ProcessInfo.UseShellExecute = $false
+    Op () {
+        $this.Init()
+    }
 
-        $this.Message = 'The command completed without error.'
-        $this.Success = $true
+    Op ([string]$VaultName) {
+        $this.Init()
         $this.Vault = $VaultName
     }
 
@@ -62,7 +49,7 @@ class Op {
         $this.AddArgument($this.Vault)
     }
 
-    [bool] InvokeOp() {
+    hidden [bool] InvokeOp() {
         Write-Verbose "(Invoke) ArgumentList=[$($this.GetSanitizedArgumentString())]"
 
         $process = [Diagnostics.Process]::new()
