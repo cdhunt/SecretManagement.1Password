@@ -37,14 +37,14 @@ class Op {
         $this.ProcessInfo.ArgumentList.Add($Argument)
     }
 
-    [void] AddAssignment ([string]$Key, [object]$Value) {
+    [void] AddAssignmentArgument ([string]$Key, [object]$Value) {
 
         $assignment = $Key, $Value.ToString() -join '='
 
         $this.ProcessInfo.ArgumentList.Add($assignment)
     }
 
-    [void] AddVaultFlag () {
+    hidden [void] AddVaultFlag () {
         $this.AddArgument('--vault')
         $this.AddArgument($this.Vault)
     }
@@ -74,7 +74,8 @@ class Op {
 
 
         try {
-            $cleanExit = $process.WaitForExit(5000)
+            $process.WaitForExit(10000)
+            $cleanExit = $true
         } catch [SystemException] {
             $this.Success = $false
             $this.Message = 'No process Id has been set, and a Handle from which the Id property can be determined does not exist or there is no process associated with this Process object.'
@@ -139,6 +140,11 @@ class OpListItemsCommand : Op {
         $this.AddArgument('items')
     }
 
+    OpListItemsCommand([string]$Vault) : base($Value) {
+        $this.AddArgument('list')
+        $this.AddArgument('items')
+    }
+
     [void] AddCategories([string[]]$Categories) {
         $this.AddArgument('--categories')
         $this.AddArgument($Categories -join ',')
@@ -151,7 +157,7 @@ class OpListItemsCommand : Op {
         $result = $this.InvokeOp()
 
         if ($result) {
-            return $result | ConvertFrom-Json
+            return ($this.StandardOuput | ConvertFrom-Json)
         } else {
             return $null
         }

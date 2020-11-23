@@ -1,6 +1,6 @@
 Describe 'Handling Op output' {
     BeforeAll {
-        . C:\source\github\SecretManagement.1Password\SecretManagement.1Password.Extension\classes\OP.ps1
+        . C:\source\github\SecretManagement.1Password\SecretManagement.1Password.Extension\classes\Op.ps1
     }
     Context 'Not signed in' -Tag 'Integration' {
         BeforeEach {

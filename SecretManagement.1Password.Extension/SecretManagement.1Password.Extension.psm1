@@ -1,5 +1,17 @@
 using namespace Microsoft.PowerShell.SecretManagement
 
+$classes = Join-Path -Path $PSScriptRoot -ChildPath 'classes'
+$public = Join-Path -Path $PSScriptRoot -ChildPath 'public'
+
+'Op.ps1' | ForEach-Object {
+    $path = Join-Path -Path $classes -ChildPath $_
+    . $path
+}
+
+Get-ChildItem -Path $public | ForEach-Object {
+    . $_
+}
+
 function Test-SecretVault {
     [CmdletBinding()]
     param (
@@ -49,42 +61,6 @@ function Test-SecretVault {
     $Vaults.name -contains $VaultName
 }
 
-function Get-SecretInfo {
-    [CmdletBinding()]
-    param (
-        [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
-        [string]$VaultName,
-        [Parameter()]
-        [string]$Filter,
-        [Parameter()]
-        [hashtable] $AdditionalParameters
-    )
-
-    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
-
-    $keyList = [Collections.ArrayList]::new()
-
-    foreach ($item in $items) {
-        if ( $keyList.Contains(($item.overview.title).ToLower()) ) {
-            Write-Verbose "Get-SecretInfo: An item with the same key has already been added. Key: [$($item.overview.title)]"
-        }
-        else {
-            $type = switch ($item.templateUuid) {
-                '001' { [SecretType]::PSCredential }
-                '005' { [SecretType]::SecureString }
-                Default { [SecretType]::Unknown }
-            }
-
-            Write-Verbose $item.overview.title
-            [SecretInformation]::new(
-                $item.overview.title,
-                $type,
-                $VaultName
-            )
-            $keyList.Add(($item.overview.title).ToLower())
-        }
-    }
-}
 
 function Get-Secret {
     [CmdletBinding()]
