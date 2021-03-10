@@ -26,16 +26,16 @@ function Test-SecretVault {
 
     if ($null -eq $vaults) {
         if ( $null -eq [System.Environment]::GetEnvironmentVariable("OP_SESSION_$accountName") ) {
-            Write-Verbose "Attemp login with shorthand and grab session token"
+            Write-Verbose "Attempt login with shorthand and grab session token"
             $token = & op signin $accountName --raw
 
             if ( $null -eq $token ) {
-                Write-Verbose "Attemp login with all parameters"
-                $token = & op signin $accountName $emailAddress $secretKey -raw
+                Write-Verbose "Attempt login with all parameters"
+                $token = & op signin $accountName $emailAddress $secretKey --raw
             }
         }
         else {
-            Write-Verbose "Attemp login with shorthand and grab session token"
+            Write-Verbose "Attempt login with shorthand and grab session token"
             & op signin $accountName
         }
 
