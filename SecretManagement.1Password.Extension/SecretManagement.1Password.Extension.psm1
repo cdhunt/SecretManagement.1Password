@@ -152,7 +152,7 @@ function Set-Secret {
 
     Write-Verbose "Secret type [$($Secret.GetType().Name)]"
     switch ($Secret.GetType()) {
-        { $_.IsValueType } {
+        { $_.Name -eq 'String' -or $_.IsValueType } {
             $category = "Password"
             Write-Verbose "Processing [string] as $category"
             $commandArgs.Add($verb) | Out-Null
