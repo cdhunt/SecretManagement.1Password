@@ -16,7 +16,7 @@ param (
 Push-Location $PSScriptRoot
 
 if ($Test) {
-    Invoke-Pester test
+    Invoke-Pester tests
 }
 
 if ($Package) {
