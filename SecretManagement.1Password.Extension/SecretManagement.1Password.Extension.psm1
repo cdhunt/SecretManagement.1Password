@@ -221,7 +221,7 @@ function Set-Secret {
                 Write-Verbose "Updating $item"
                 $commandArgs.Add($item) | Out-Null
                 $commandArgs.Add("username=$($Secret.UserName)") | Out-Null
-                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret -AsPlainText)") | Out-Null
+                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret.Password -AsPlainText)") | Out-Null
             }
             break
         }
