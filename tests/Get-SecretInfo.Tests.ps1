@@ -10,6 +10,10 @@ BeforeAll {
 		UserName     = 'TestUserName'
 		Password     = 'TestPassword'
 	}
+
+	Get-Module SecretManagement.1Password | Remove-Module -Force
+	Get-Module Microsoft.PowerShell.SecretManagement | Remove-Module -Force
+	Register-SecretVault -ModuleName (Join-Path $PSScriptRoot '..\SecretManagement.1Password.psd1') -Name $testDetails.Values -AllowClobber
 }
 
 Describe 'It gets login info with vault specified' {
