@@ -2,6 +2,7 @@
 # TODO: Vault is manually specified for all tests to avoid https://github.com/cdhunt/SecretManagement.1Password/issues/16
 
 BeforeAll {
+	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 	$testDetails = @{
 		Vault     = 'Personal'
 		LoginName = 'TestLogin' + (Get-Random -Maximum 99999)
@@ -17,6 +18,7 @@ Describe 'It updates items that already exist' {
 		$item = & op get item $testDetails.LoginName --fields title --vault $testDetails.Vault 2>$null
 		if ($null -eq $item) {
 			& op create item login --title $testDetails.LoginName "username=$($testDetails.UserName)" "password=$($testDetails.Password)"
+			[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 			$createdLogin = $true
 		} else {
 			Write-Warning "An item called $($testDetails.LoginName) already exists"
@@ -70,6 +72,7 @@ Describe 'It creates items' {
 		# TODO: currently also creates if >1 exists
 		$item = & op get item $testDetails.LoginName --fields title --vault $testDetails.Vault 2>$null
 		if ($null -eq $item) {
+			[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 			$createdLogin = $true
 		} else {
 			Write-Warning "An item called $($testDetails.LoginName) already exists"

@@ -2,6 +2,7 @@
 # TODO: Vault is manually specified for all tests to avoid https://github.com/cdhunt/SecretManagement.1Password/issues/16
 
 BeforeAll {
+	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 	$testDetails = @{
 		Vault        = 'Personal'
 		LoginName    = 'TestLogin' + (Get-Random -Maximum 99999)
@@ -18,6 +19,7 @@ Describe 'It gets logins with vault specified' {
 		$item = & op get item $testDetails.LoginName --fields title --vault $testDetails.Vault 2>$null
 		if ($null -eq $item) {
 			& op create item login --title $testDetails.LoginName "username=$($testDetails.UserName)" "password=$($testDetails.Password)"
+			[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 			$createdLogin = $true
 		} else {
 			Write-Warning "An item called $($testDetails.LoginName) already exists"
@@ -50,6 +52,7 @@ Describe 'It gets passwords with vault specified' {
 		$item = & op get item $testDetails.PasswordName --fields title --vault $testDetails.Vault 2>$null
 		if ($null -eq $item) {
 			& op create item password --title $testDetails.PasswordName "password=$($testDetails.Password)"
+			[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 			$createdPassword = $true
 		} else {
 			Write-Warning "An item called $($testDetails.PasswordName) already exists"
@@ -74,6 +77,7 @@ Describe 'It gets one-time passwords with vault specified' {
 	BeforeAll {
 		# Relies on an item called TOTPTest with TOTP set up being present
 		# TODO: How to create TOTP using op?
+		[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 		$TOTPName = 'TOTPTest'
 	}
 

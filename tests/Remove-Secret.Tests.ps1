@@ -14,6 +14,7 @@ BeforeDiscovery {
 	$item = & op get item $testDetails.LoginName --fields title --vault $testDetails.Vault 2>$null
 	if ($null -eq $item) {
 		& op create item login --title $testDetails.LoginName "username=$($testDetails.UserName)" "password=$($testDetails.Password)"
+		[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 		$createdLogin = $true
 	} else {
 		Write-Warning "An item called $($testDetails.LoginName) already exists. Remove-Item test will be skipped."
