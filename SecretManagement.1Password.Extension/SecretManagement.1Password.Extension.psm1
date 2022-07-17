@@ -62,6 +62,7 @@ function Get-SecretInfo {
 
     $json = & op list items --categories Login,Password --vault $VaultName
     $items = $json -replace 'b5UserUUID','B5UserUUID' | ConvertFrom-Json
+    $items = $items | Where-Object {$_.overview.title -like $Filter}
 
     $keyList = [Collections.ArrayList]::new()
 
