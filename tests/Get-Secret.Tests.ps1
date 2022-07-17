@@ -1,5 +1,5 @@
 # This assumes 1Password is already registered and unlocked
-# TODO: totp
+# TODO: Vault is manually specified for all tests to avoid https://github.com/cdhunt/SecretManagement.1Password/issues/16
 
 BeforeAll {
 	$testDetails = @{
