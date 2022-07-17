@@ -22,8 +22,14 @@ Describe 'It updates items that already exist' {
 		}
 	}
 
-	It 'Sets the password from a value type with vault specified' {
+	It 'Sets the password from an int value type with vault specified' {
 		$testvalue = 123456
+		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
+		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
+	}
+
+	It 'Sets the password from a char value type with vault specified' {
+		$testvalue = [char]'a'
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
@@ -67,9 +73,15 @@ Describe 'It creates items' {
 		}
 	}
 
-	It 'Sets the password from a value type with vault specified' -Skip {
+	It 'Sets the password from an int value type with vault specified' -Skip {
 		# TODO: does not work, appears to be an issue in op: json: cannot unmarshal number into Go struct field _passwordItemDetails.password of type string
 		$testvalue = 123456
+		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
+		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
+	}
+
+	It 'Sets the password from a char value type with vault specified' {
+		$testvalue = [char]'a'
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
