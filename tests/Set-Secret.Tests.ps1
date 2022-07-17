@@ -51,9 +51,11 @@ Describe 'It updates items that already exist' {
 	It 'Sets the password from a PSCredential with vault specified' -Skip {
 		# TODO: Updating an existing item using a PSCredential does not currently work
 		$testvalue = 'PSCredential Password!'
-		$cred = [pscredential]::new('PSCredential Username', ($testvalue | ConvertTo-SecureString -AsPlainText -Force))
+		$testusername = 'PSCredential Username'
+		$cred = [pscredential]::new($testusername, ($testvalue | ConvertTo-SecureString -AsPlainText -Force))
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $cred
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
+		& op get item $testDetails.LoginName --fields username --vault $testDetails.Vault | Should -Be $testusername
 	}
 	
 	AfterAll {
@@ -100,12 +102,14 @@ Describe 'It creates items' {
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
 	
-	It 'Sets the password from a PSCredential with vault specified' {
+	It 'Sets the username and password from a PSCredential with vault specified' {
 		# TODO: Updating an existing item using a PSCredential does not currently work
 		$testvalue = 'PSCredential Password!'
-		$cred = [pscredential]::new('PSCredential Username', ($testvalue | ConvertTo-SecureString -AsPlainText -Force))
+		$testusername = 'PSCredential Username'
+		$cred = [pscredential]::new($testusername, ($testvalue | ConvertTo-SecureString -AsPlainText -Force))
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $cred
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
+		& op get item $testDetails.LoginName --fields username --vault $testDetails.Vault | Should -Be $testusername
 	}
 	
 	AfterEach {
