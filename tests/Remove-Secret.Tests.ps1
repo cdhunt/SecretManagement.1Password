@@ -22,10 +22,11 @@ BeforeDiscovery {
 }
 
 Describe 'It removes items' {
-	It 'It removes an item with vault specified' -Skip:($createdLogin -ne $true) {
+	It 'It removes an item with vault specified' -Skip:($createdLogin -ne $true) -ForEach @(@{LoginName = $testDetails.LoginName}) {
 		# Skip the test if we did not create the login item
-		Remove-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName
+		# Use -ForEach to get the same $LoginName value as in BeforeDiscovery
+		Remove-Secret -Vault $testDetails.Vault -Name $LoginName
 		# Confirm the item no longer exists
-		& op get item $testDetails.LoginName --fields title --vault $testDetails.Vault 2>$null | Should -BeNullOrEmpty
+		& op get item $LoginName --fields title --vault $testDetails.Vault 2>$null | Should -BeNullOrEmpty
 	}
 }
