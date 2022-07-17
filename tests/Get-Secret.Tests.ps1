@@ -69,3 +69,24 @@ Describe 'It gets passwords with vault specified' {
 		if ($createdPassword) {& op delete item $testDetails.PasswordName}
 	}
 }
+
+Describe 'It gets one-time passwords with vault specified' {
+	BeforeAll {
+		# Relies on an item called TOTPTest with TOTP set up being present
+		# TODO: How to create TOTP using op?
+		$TOTPName = 'TOTPTest'
+	}
+
+	It 'Gets a TOTP' {
+		Get-Secret -Vault $testDetails.Vault -Name $TOTPName |
+		Get-Member -MemberType ScriptMethod |
+		Select-Object -ExpandProperty Name |
+		Should -Contain 'totp'
+	}
+
+	It 'Gets the TOTP with vault specified' {
+		$secret = Get-Secret -Vault $testDetails.Vault -Name $TOTPName
+		# Timing issues, test will be flaky
+		$secret.totp() | Should -Be (& op get totp $TOTPName --vault Personal 2>$nul)
+	}
+}
