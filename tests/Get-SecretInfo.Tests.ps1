@@ -30,14 +30,12 @@ Describe 'It gets items' {
 		}
 	}
 
-	It 'returns all items' -Skip {
-		# TODO: https://github.com/cdhunt/SecretManagement.1Password/issues/8
+	It 'returns all items' {
 		$info = Get-SecretInfo -Vault $testDetails.Vault
 		$info.Count | Should -BeGreaterOrEqual 1
 	}
 
-	it 'filters items' -skip {
-		# TODO: filtering is not yet implemented
+	it 'filters items' {
 		$info = Get-SecretInfo -Vault $testDetails.Vault -Name $testDetails.LoginName
 		$info | Should -HaveCount 1
 	}
@@ -61,8 +59,7 @@ Describe 'It gets login info with vault specified' {
 		}
 	}
 
-	It 'returns logins as PSCredentials' -Skip {
-		# TODO: https://github.com/cdhunt/SecretManagement.1Password/issues/8
+	It 'returns logins as PSCredentials' {
 		$info = Get-SecretInfo -Vault $testDetails.Vault -Name $testDetails.LoginName
 		$info | Should -BeOfType [Microsoft.PowerShell.SecretManagement.SecretInformation]
 		$info.Type | Should -Be PSCredential
@@ -87,8 +84,7 @@ Describe 'It gets password info with vault specified' {
 		}
 	}
 
-	It 'returns passwords as SecureStrings' -Skip {
-		# TODO: https://github.com/cdhunt/SecretManagement.1Password/issues/8
+	It 'returns passwords as SecureStrings' {
 		$info = Get-SecretInfo -Vault $testDetails.Vault -Name $testDetails.PasswordName
 		$info | Should -BeOfType [Microsoft.PowerShell.SecretManagement.SecretInformation]
 		$info.Type | Should -Be SecureString
