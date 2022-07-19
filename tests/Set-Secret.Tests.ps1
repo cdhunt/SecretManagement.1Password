@@ -41,8 +41,7 @@ Describe 'It updates items that already exist' {
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
 
-	It 'Sets the password from a string with vault specified' -Skip {
-		# TODO: Using a string with Set-Secret does not currently work https://github.com/cdhunt/SecretManagement.1Password/issues/17
+	It 'Sets the password from a string with vault specified' {
 		$testvalue = 'String Password!'
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
@@ -95,8 +94,7 @@ Describe 'It creates items' {
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
 
-	It 'Sets the password from a string with vault specified' -Skip {
-		# TODO: Using a string with Set-Secret does not currently work https://github.com/cdhunt/SecretManagement.1Password/issues/17
+	It 'Sets the password from a string with vault specified' {
 		$testvalue = 'String Password!'
 		Set-Secret -Vault $testDetails.Vault -Name $testDetails.LoginName -Secret $testvalue
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
