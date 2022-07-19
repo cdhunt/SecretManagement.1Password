@@ -54,8 +54,7 @@ Describe 'It updates items that already exist' {
 		& op get item $testDetails.LoginName --fields password --vault $testDetails.Vault | Should -Be $testvalue
 	}
 	
-	It 'Sets the password from a PSCredential with vault specified' -Skip {
-		# TODO: Updating an existing item using a PSCredential does not currently work
+	It 'Sets the password from a PSCredential with vault specified' {
 		$testvalue = 'PSCredential Password!'
 		$testusername = 'PSCredential Username'
 		$cred = [pscredential]::new($testusername, ($testvalue | ConvertTo-SecureString -AsPlainText -Force))
