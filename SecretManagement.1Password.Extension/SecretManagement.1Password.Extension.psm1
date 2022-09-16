@@ -60,7 +60,9 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    $items = & op list items --categories Login,Password --vault $VaultName | ConvertFrom-Json
+    $json = & op list items --categories Login,Password --vault $VaultName
+    $items = $json -replace 'b5UserUUID','B5UserUUID' | ConvertFrom-Json
+    $items = $items | Where-Object {$_.overview.title -like $Filter}
 
     $keyList = [Collections.ArrayList]::new()
 
@@ -152,7 +154,7 @@ function Set-Secret {
 
     Write-Verbose "Secret type [$($Secret.GetType().Name)]"
     switch ($Secret.GetType()) {
-        { $_.IsValueType } {
+        { $_.Name -eq 'String' -or $_.IsValueType } {
             $category = "Password"
             Write-Verbose "Processing [string] as $category"
             $commandArgs.Add($verb) | Out-Null
@@ -221,7 +223,7 @@ function Set-Secret {
                 Write-Verbose "Updating $item"
                 $commandArgs.Add($item) | Out-Null
                 $commandArgs.Add("username=$($Secret.UserName)") | Out-Null
-                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret -AsPlainText)") | Out-Null
+                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret.Password -AsPlainText)") | Out-Null
             }
             break
         }
