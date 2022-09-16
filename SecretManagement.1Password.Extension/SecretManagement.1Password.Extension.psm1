@@ -22,7 +22,7 @@ function Test-SecretVault {
     if (-not $VaultParameters.SecretKey) { throw '1Password: You must specify an SecretKey for your 1Password Account to test' }
 
     Write-Verbose "Test listing vaults"
-    $vaults = & op list vaults 2>$null | ConvertFrom-Json
+    $vaults = & op vault list --format json | ConvertFrom-Json
 
     if ($null -eq $vaults) {
         if ( $null -eq [System.Environment]::GetEnvironmentVariable("OP_SESSION_$accountName") ) {
@@ -43,7 +43,7 @@ function Test-SecretVault {
         [System.Environment]::SetEnvironmentVariable("OP_SESSION_$accountName", $token)
 
         Write-Verbose "Test listing vaults final"
-        $vaults = & op list vaults 2>$null | ConvertFrom-Json
+        $vaults = & op vault list 2>$null | ConvertFrom-Json
     }
 
     $Vaults.name -contains $VaultName
@@ -60,30 +60,30 @@ function Get-SecretInfo {
         [hashtable] $AdditionalParameters
     )
 
-    $json = & op list items --categories Login,Password --vault $VaultName
-    $items = $json -replace 'b5UserUUID','B5UserUUID' | ConvertFrom-Json
-    $items = $items | Where-Object {$_.overview.title -like $Filter}
+    $json = & op item list --categories "LOGIN,PASSWORD" --format json
+    $items = $json -replace 'b5UserUUID', 'B5UserUUID' | ConvertFrom-Json
+    $items = $items | Where-Object { $_.overview.title -like $Filter }
 
     $keyList = [Collections.ArrayList]::new()
 
     foreach ($item in $items) {
-        if ( $keyList.Contains(($item.overview.title).ToLower()) ) {
-            Write-Verbose "Get-SecretInfo: An item with the same key has already been added. Key: [$($item.overview.title)]"
+        if ( $keyList.Contains(($item.title).ToLower()) ) {
+            Write-Verbose "Get-SecretInfo: An item with the same key has already been added. Key: [$($item.title)]"
         }
         else {
-            $type = switch ($item.templateUuid) {
-                '001' { [SecretType]::PSCredential }
-                '005' { [SecretType]::SecureString }
+            $type = switch ($item.category) {
+                'LOGIN' { [SecretType]::PSCredential }
+                'PASSWORD' { [SecretType]::SecureString }
                 Default { [SecretType]::Unknown }
             }
 
-            Write-Verbose $item.overview.title
+            Write-Verbose $item.title
             [SecretInformation]::new(
-                $item.overview.title,
+                $item.title,
                 $type,
                 $VaultName
             )
-            $keyList.Add(($item.overview.title).ToLower())
+            $keyList.Add(($item.title).ToLower())
         }
     }
 }
@@ -101,34 +101,37 @@ function Get-Secret {
         [hashtable] $AdditionalParameters
     )
     $totp = -1
-    $item = & op get item $Name --fields username,password,one-timepassword --vault $VaultName | ConvertFrom-Json -AsHashtable
-    if (-not [string]::IsNullOrEmpty($item["one-timepassword"]) )
-    {
-        $totp = & op get totp $Name --vault $VaultName 2>$nul
+    $item = & op item get $Name --format json | ConvertFrom-Json -AsHashtable
+    if ($item.fields.Keys.Contains("totp")) {
+        $totp = $item.fields.totp
     }
 
-    if ( -not [string]::IsNullOrEmpty($item["password"]) ) {
-        [securestring]$secureStringPassword = ConvertTo-SecureString $item.password -AsPlainText -Force
+    $password = $item.fields.Where({ $_.id -eq 'password' })
+    $username = $item.fields.Where({ $_.id -eq 'username' })
+    if ( -not [string]::IsNullOrEmpty($password.value) ) {
+        [securestring]$secureStringPassword = ConvertTo-SecureString $password.value -AsPlainText -Force
     }
 
     $output = $null
 
-    if ([string]::IsNullOrEmpty($item["password"]) -and -not [string]::IsNullOrEmpty($item.username)) {
-        $output = @{UserName = $item.username}
-    } elseif
-    ([string]::IsNullOrEmpty($item.username)) {
+    if ([string]::IsNullOrEmpty($password.value) -and -not [string]::IsNullOrEmpty($username.value)) {
+        $output = @{UserName = $username.value }
+    }
+    elseif
+    ([string]::IsNullOrEmpty($username.value)) {
         $output = $secureStringPassword
     }
     else {
         $output = [PSCredential]::new(
-            $item.username,
+            $username.value,
             $secureStringPassword
         )
     }
 
     if ($totp -gt -1) {
-            $output | Add-Member -MemberType ScriptMethod -Name totp -Value {& op get totp $Name --vault $VaultName}.GetNewClosure() -PassThru
-    } else {
+        $output | Add-Member -MemberType Property -Name totp -Value $totp -PassThru
+    }
+    else {
         $output
     }
 }
@@ -146,34 +149,45 @@ function Set-Secret {
         [hashtable] $AdditionalParameters
     )
 
-    $item = & op get item $Name --fields title --vault $VaultName 2>$null
+    $item = &  op item get $Name --format json | ConvertFrom-Json | Select-Object -ExpandProperty Title
     $verb = if ($null -eq $item) { 'create' } else { 'edit' }
     Write-Verbose $verb
     $data = @{}
     $commandArgs = [Collections.ArrayList]::new()
+
+    <#
+    op item create --category=login --title='My Example Item' --vault='Test' `
+    --url https://www.acme.com/login `
+    --generate-password=20,letters,digits `
+    username=jane@acme.com `
+    'Test Field 1=my test secret' `
+    'Test Section 1.Test Field2[text]=Jane Doe' `
+    'Test Section 1.Test Field3[date]=1995-02-23' `
+    'Test Section 2.Test Field4[text]='$myNotes
+    #>
 
     Write-Verbose "Secret type [$($Secret.GetType().Name)]"
     switch ($Secret.GetType()) {
         { $_.Name -eq 'String' -or $_.IsValueType } {
             $category = "Password"
             Write-Verbose "Processing [string] as $category"
-            $commandArgs.Add($verb) | Out-Null
             $commandArgs.Add('item') | Out-Null
+            $commandArgs.Add($verb) | Out-Null
+
 
             if ('create' -eq $verb ) {
                 Write-Verbose "Creating $Name"
-                $data = op get template $category | ConvertFrom-Json -AsHashtable
-                $data.password = $Secret
-                $endcodedData = $data | ConvertTo-Json | op encode
 
-                $commandArgs.Add($category) | Out-Null
-                $commandArgs.Add($endcodedData) | Out-Null
-                $commandArgs.Add("Title=$Name") | Out-Null
+                $commandArgs.Add("--category=$category") | Out-Null
+                $commandArgs.Add("--title='$Name'") | Out-Null
+                $commandArgs.Add("'password=$Secret'") | Out-Null
             }
             else {
                 Write-Verbose "Updating $item"
+
                 $commandArgs.Add($item) | Out-Null
-                $commandArgs.Add("password=$Secret") | Out-Null
+                $commandArgs.Add("'$Name'") | Out-Null
+                $commandArgs.Add("'password=$Secret'") | Out-Null
             }
             break
         }
@@ -185,18 +199,15 @@ function Set-Secret {
 
             if ('create' -eq $verb ) {
                 Write-Verbose "Creating $Name"
-                $data = op get template $category | ConvertFrom-Json -AsHashtable
-                $data.password = ConvertFrom-SecureString -SecureString $Secret -AsPlainText
-                $endcodedData = $data | ConvertTo-Json | op encode
-
-                $commandArgs.Add($category) | Out-Null
-                $commandArgs.Add($endcodedData) | Out-Null
-                $commandArgs.Add("Title=$Name") | Out-Null
+                $commandArgs.Add("--category=$category") | Out-Null
+                $commandArgs.Add("--title='$Name'") | Out-Null
+                $commandArgs.Add("'password=$(ConvertFrom-SecureString -SecureString $Secret -AsPlainText)'") | Out-Null
             }
             else {
                 Write-Verbose "Updating $item"
                 $commandArgs.Add($item) | Out-Null
-                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret -AsPlainText)") | Out-Null
+                $commandArgs.Add("'$Name'") | Out-Null
+                $commandArgs.Add("'password=$(ConvertFrom-SecureString -SecureString $Secret -AsPlainText)'") | Out-Null
             }
             break
         }
@@ -208,30 +219,26 @@ function Set-Secret {
 
             if ('create' -eq $verb ) {
                 Write-Verbose "Creating $Name"
-                $data = op get template $category | ConvertFrom-Json -AsHashtable
-                $data.fields | ForEach-Object {
-                    if ($_.name -eq 'username') { $_.value = $Secret.UserName }
-                    if ($_.name -eq 'password') { $_.value = $Secret.GetNetworkCredential().Password }
-                }
-                $endcodedData = $data | ConvertTo-Json | op encode
 
-                $commandArgs.Add($category) | Out-Null
-                $commandArgs.Add($endcodedData) | Out-Null
-                $commandArgs.Add("Title=$Name") | Out-Null
+                $commandArgs.Add("--category=$category") | Out-Null
+                $commandArgs.Add("--title='$Name'") | Out-Null
+                $commandArgs.Add("'username=$($Secret.UserName)'") | Out-Null
+                $commandArgs.Add("'password=$($Secret.GetNetworkCredential().Password)'") | Out-Null
             }
             else {
                 Write-Verbose "Updating $item"
                 $commandArgs.Add($item) | Out-Null
-                $commandArgs.Add("username=$($Secret.UserName)") | Out-Null
-                $commandArgs.Add("password=$(ConvertFrom-SecureString -SecureString $Secret.Password -AsPlainText)") | Out-Null
+                $commandArgs.Add("'$Name'") | Out-Null
+                $commandArgs.Add("'username=$($Secret.UserName)'") | Out-Null
+                $commandArgs.Add("'password=$($Secret.GetNetworkCredential().Password)'") | Out-Null
             }
             break
         }
         Default {}
     }
 
-    $commandArgs.Add('--vault') | Out-Null
-    $commandArgs.Add($VaultName) | Out-Null
+    #$commandArgs.Add('--vault') | Out-Null
+    #$commandArgs.Add($VaultName) | Out-Null
 
     $sanitizedArgs = $commandArgs | ForEach-Object {
         if ($_ -like 'password=*') {
@@ -262,12 +269,13 @@ function Remove-Secret {
 
     $verb = 'delete'
     $commandArgs = [Collections.ArrayList]::new()
-    $commandArgs.Add($verb) | Out-Null
     $commandArgs.Add("item") | Out-Null
-    $commandArgs.Add($Name) | Out-Null
-    $commandArgs.Add('--vault') | Out-Null
-    $commandArgs.Add($VaultName) | Out-Null
+    $commandArgs.Add($verb) | Out-Null
 
+    $commandArgs.Add("'$Name'") | Out-Null
+    #$commandArgs.Add('--vault') | Out-Null
+    #$commandArgs.Add($VaultName) | Out-Null
+    $commandArgs.Add("--archive") | Out-Null
     Write-Verbose ($commandArgs -join ' ')
     & op @commandArgs
 
