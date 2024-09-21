@@ -4,7 +4,7 @@
 BeforeAll {
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 	$testDetails = @{
-		Vault        = 'Personal'
+		Vault        = 'Employee'
 		LoginName    = 'TestLogin' + (Get-Random -Maximum 99999)
 		PasswordName = 'TestPassword' + (Get-Random -Maximum 99999)
 		UserName     = 'TestUserName'

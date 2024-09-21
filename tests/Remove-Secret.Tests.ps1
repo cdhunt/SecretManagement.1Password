@@ -3,7 +3,7 @@
 
 BeforeDiscovery {
 	$testDetails = @{
-		Vault     = 'Personal'
+		Vault     = 'Employee'
 		LoginName = 'TestLogin' + (Get-Random -Maximum 99999)
 		UserName  = 'TestUserName'
 		Password  = 'TestPassword'
