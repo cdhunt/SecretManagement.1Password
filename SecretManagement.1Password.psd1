@@ -12,7 +12,7 @@
     # RootModule = ''
 
     # Version number of this module.
-    ModuleVersion     = '0.0.4.6'
+    ModuleVersion     = '2.0.0.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -32,7 +32,7 @@
     Description       = 'SecretManagement extension for 1Password'
 
     # Minimum version of the PowerShell engine required by this module
-    # PowerShellVersion = ''
+    PowerShellVersion = '5.1'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
