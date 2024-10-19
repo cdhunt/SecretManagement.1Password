@@ -100,7 +100,8 @@ Name or Id of the 1Password vault associated with the SecretManagement vault.
 
 If this parameter is missing then the 1Password CLI will search on all vaults in the target account. 
 
-WARNING: Not linking the SecretManagement vault with a unique 1Password vault may cause issues because there may be more than one secret, stored in different 1Password vaults, sharing the same name. In that case, retrieval and updates uperations will have issues.
+> [!WARNING]
+> Not linking the SecretManagement vault with a unique 1Password vault may cause issues because there may be more than one secret, stored in different 1Password vaults, sharing the same name. In that case, retrieval and updates uperations will have issues.
 
 ## Dependencies
 
