@@ -114,7 +114,8 @@ This module extension has been developed and tested with the following dependenc
 
 ### Development issue: Reimporting the extension module (or the parent SecretManagement module) doesn't refresh changes made in the extension module after the later has been previusly loaded
 
-**Note**: This issue affects only to developers of this module extension. Regular users are not affected.
+> [!NOTE]
+> This issue affects only to developers of this module extension. Regular users are not affected.
 
 The SecretManagement.1Password module is an extension for the main module Microsoft.PowerShell.SecretManagement.
 
