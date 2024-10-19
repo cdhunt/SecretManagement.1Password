@@ -40,7 +40,7 @@ if ($Publish) {
     Write-Host "Prerelease: $($moduleData.PrivateData.PSData.Prerelease)"
     Write-Host -ForegroundColor Green "Here we go..."
 
-    Publish-Module -Path ./release/SecretManagement.1Password -NuGetApiKey $env:PSGALLERYAPIKEY
+    Publish-Module -Path ./release/SecretManagement.1Password -NuGetApiKey (Get-Secret -Name PSGalleryApiKey -AsPlainText)
 }
 
 Pop-Location
