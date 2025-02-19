@@ -178,9 +178,12 @@ function Get-SecretInfo {
             }
             
             $metadata = @{
+                id = $item.id
                 version = $item.version
                 created_at = Get-Date $item.created_at
                 updated_at = Get-Date $item.updated_at
+                additional_information = $item.additional_information
+                urls = $item.urls
             }
 
             Write-Verbose $item.title
