@@ -142,10 +142,10 @@ function Get-SecretInfo {
     $commandArgs = [System.Collections.ArrayList]::new();
     $commandArgs.AddRange(@('item', 'list'));
     if ($VaultParameters.AccountName) {
-        $commandArgs.AddRange(@('--account', "$($VaultParameters.AccountName)"));
+        $commandArgs.AddRange(@('--account', """$($VaultParameters.AccountName)"""));
     }
     if ($VaultParameters.OPVault) {
-        $commandArgs.AddRange(@('--vault', "$($VaultParameters.OPVault)"));
+        $commandArgs.AddRange(@('--vault', """$($VaultParameters.OPVault)"""));
     }
     $commandArgs.AddRange(@('--categories', '"LOGIN,PASSWORD"', '--format', 'json'));
     $result = Invoke-OpCommand $commandArgs;
@@ -226,10 +226,10 @@ function Get-Secret {
     $commandArgs = [System.Collections.ArrayList]::new();
     $commandArgs.AddRange(@('item', 'get', """$($Name)"""));
     if ($VaultParameters.AccountName) {
-        $commandArgs.AddRange(@('--account', "$($VaultParameters.AccountName)"));
+        $commandArgs.AddRange(@('--account', """$($VaultParameters.AccountName)"""));
     }
     if ($VaultParameters.OPVault) {
-        $commandArgs.AddRange(@('--vault', "$($VaultParameters.OPVault)"));
+        $commandArgs.AddRange(@('--vault', """$($VaultParameters.OPVault)"""));
     }
     $commandArgs.AddRange(@('--format', 'json'));
     $result = Invoke-OpCommand $commandArgs;
@@ -331,10 +331,10 @@ function Set-Secret {
     $commandArgs = [System.Collections.ArrayList]::new();
     $commandArgs.AddRange(@('item', 'get', """$($Name)"""));
     if ($VaultParameters.AccountName) {
-        $commandArgs.AddRange(@('--account', "$($VaultParameters.AccountName)"));
+        $commandArgs.AddRange(@('--account', """$($VaultParameters.AccountName)"""));
     }
     if ($VaultParameters.OPVault) {
-        $commandArgs.AddRange(@('--vault', "$($VaultParameters.OPVault)"));
+        $commandArgs.AddRange(@('--vault', """$($VaultParameters.OPVault)"""));
     }
     $commandArgs.AddRange(@('--format', 'json'));
     $result = Invoke-OpCommand $commandArgs;
@@ -354,10 +354,10 @@ function Set-Secret {
     $commandArgs = [System.Collections.ArrayList]::new();
     $commandArgs.AddRange(@('item', $verb));
     if ($VaultParameters.AccountName) {
-        $commandArgs.AddRange(@('--account', "$($VaultParameters.AccountName)"));
+        $commandArgs.AddRange(@('--account', """$($VaultParameters.AccountName)"""));
     }
     if ($VaultParameters.OPVault) {
-        $commandArgs.AddRange(@('--vault', "$($VaultParameters.OPVault)"));
+        $commandArgs.AddRange(@('--vault', """$($VaultParameters.OPVault)"""));
     }
     $commandArgs.AddRange(@('--format', 'json'));
 
@@ -477,10 +477,10 @@ function Remove-Secret {
     $commandArgs = [System.Collections.ArrayList]::new();
     $commandArgs.AddRange(@('item', 'delete', """$($Name)"""));
     if ($VaultParameters.AccountName) {
-        $commandArgs.AddRange(@('--account', "$($VaultParameters.AccountName)"));
+        $commandArgs.AddRange(@('--account', """$($VaultParameters.AccountName)"""));
     }
     if ($VaultParameters.OPVault) {
-        $commandArgs.AddRange(@('--vault', "$($VaultParameters.OPVault)"));
+        $commandArgs.AddRange(@('--vault', """$($VaultParameters.OPVault)"""));
     }
     $commandArgs.Add("--archive") | Out-Null
     Write-Verbose ($commandArgs -join ' ')
