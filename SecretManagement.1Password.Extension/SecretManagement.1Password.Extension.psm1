@@ -29,6 +29,8 @@ Argument list to be passed to the 1Password CLI console application.
     $pinfo.RedirectStandardError = $true;
     $pinfo.RedirectStandardOutput = $true;
     $pinfo.UseShellExecute = $false;
+    $pinfo.CreateNoWindow = $true;
+    $pinfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden;
     $pinfo.Arguments = ($ArgumentList -join " ");
     $p = New-Object System.Diagnostics.Process;
     $p.StartInfo = $pinfo;
