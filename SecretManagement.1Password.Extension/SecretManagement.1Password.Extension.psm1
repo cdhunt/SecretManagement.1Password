@@ -176,6 +176,15 @@ function Get-SecretInfo {
                 'PASSWORD' { [SecretType]::SecureString }
                 Default { [SecretType]::Unknown }
             }
+            
+            $metadata = @{
+                id = $item.id
+                version = $item.version
+                created_at = Get-Date $item.created_at
+                updated_at = Get-Date $item.updated_at
+                additional_information = $item.additional_information
+                urls = $item.urls
+            }
 
             Write-Verbose $item.title
             
@@ -185,7 +194,7 @@ function Get-SecretInfo {
             # See: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.secretmanagement/get-secret?view=ps-modules#-inputobject
             $keyList.Add( `
                 $(($item.title).ToLower()), `
-                [SecretInformation]::new($item.title, $type, $($VaultName)) `
+                [SecretInformation]::new($item.title, $type, $($VaultName), $metadata) `
             );
         }
     }

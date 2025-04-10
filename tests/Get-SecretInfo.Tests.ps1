@@ -42,6 +42,11 @@ Describe 'It gets items' {
 		$info | Should -HaveCount 1
 	}
 
+	it 'includes metadata' {
+		$info = Get-SecretInfo -Vault "$($testDetails.Vault)"
+		$info.Metadata.Count | Should -BeGreaterOrEqual 3
+	}
+
 	AfterAll {
 		if ($createdLogin) {& op item delete "$($testDetails.LoginName)"}
 	}
